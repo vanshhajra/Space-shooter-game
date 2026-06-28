@@ -51,7 +51,6 @@ let gamePaused  = false;
 let score = 0;
 let lives = 3;
 let level = 1;
-let _diffStep = 0; // cached; updated in updateLevel()
 const MAX_LIVES        = 3;
 const POINTS_PER_LEVEL = 100;
 
@@ -74,7 +73,8 @@ const bullets = [];
 const BULLET_SPEED_BASE = 8;
 // After level 3, bullet speed increases by 0.5 per difficultyStep (capped at 18)
 function bulletSpeed() {
-  return _diffStep >= 2 ? Math.min(18, BULLET_SPEED_BASE + (_diffStep - 1) * 0.5) : BULLET_SPEED_BASE;
+  const step = difficultyStep();
+  return step >= 2 ? Math.min(18, BULLET_SPEED_BASE + (step - 1) * 0.5) : BULLET_SPEED_BASE;
 }
 const BULLET_WIDTH  = 4;
 const BULLET_HEIGHT = 12;
@@ -93,18 +93,11 @@ const bindings = {
 
 const keys = { left: false, right: false, attack: false };
 
-// Reverse lookup: lowercase key string → action name. Rebuilt on rebind.
-const keyToAction = new Map();
-function buildKeyMap() {
-  keyToAction.clear();
-  for (const [action, keyList] of Object.entries(bindings)) {
-    for (const k of keyList) keyToAction.set(k.toLowerCase(), action);
-  }
-}
-buildKeyMap();
-
 function getActionForKey(key) {
-  return keyToAction.get(key.toLowerCase()) ?? null;
+  for (const [action, keyList] of Object.entries(bindings)) {
+    if (keyList.map(k => k.toLowerCase()).includes(key.toLowerCase())) return action;
+  }
+  return null;
 }
 
 document.addEventListener('keydown', (e) => {
@@ -201,7 +194,8 @@ document.addEventListener('mousedown', resumeAudio, { once: true });
 document.addEventListener('touchstart', resumeAudio, { once: true });
 
 // --- Shoot ---
-function shoot(now) {
+function shoot() {
+  const now = Date.now();
   const cooldown = isRapidfire() ? SHOOT_COOLDOWN / 2 : SHOOT_COOLDOWN;
   if (now - lastShotTime < cooldown) return;
   lastShotTime = now;
@@ -278,10 +272,10 @@ function drawBullets() {
 
 // --- Particles ---
 const particles = [];
-const EXPLOSION_COLORS = ['#ff6600', '#ff3300', '#ffaa00', '#ff0000', '#ffcc44'];
 
 function spawnExplosion(x, y, isBoss) {
   const count  = isBoss ? 28 : 14;
+  const colors = ['#ff6600', '#ff3300', '#ffaa00', '#ff0000', '#ffcc44'];
   for (let i = 0; i < count; i++) {
     const angle = Math.random() * Math.PI * 2;
     const speed = isBoss ? (2 + Math.random() * 5) : (1.5 + Math.random() * 3.5);
@@ -291,7 +285,7 @@ function spawnExplosion(x, y, isBoss) {
       vx: Math.cos(angle) * speed,
       vy: Math.sin(angle) * speed,
       size,
-      color: EXPLOSION_COLORS[Math.floor(Math.random() * EXPLOSION_COLORS.length)],
+      color: colors[Math.floor(Math.random() * colors.length)],
       alpha: 1,
       decay: 0.02 + Math.random() * 0.03
     });
@@ -395,7 +389,7 @@ function updateBoss(now) {
   }
 }
 
-function checkBulletBossCollisions(now) {
+function checkBulletBossCollisions() {
   if (!boss) return;
   for (let bi = bullets.length - 1; bi >= 0; bi--) {
     if (bulletHitsBoss(bullets[bi])) {
@@ -407,7 +401,7 @@ function checkBulletBossCollisions(now) {
         score += boss.maxHp * 10;
         const bx = boss.x, by = boss.y;
         boss = null;
-        lastBossSpawn = now;
+        lastBossSpawn = Date.now();
         // Drop a random power-up at boss position
         spawnPowerup(bx, by);
       }
@@ -423,13 +417,17 @@ const HIT_MARGIN    = 2;  // bullet counts as hit within 2px around the enemy ed
 // --- Difficulty scaling ---
 // Levels 1-10: increase every 2 levels (step = 0.5 levels worth of increments)
 // Level 11+:   increase every level
-function difficultyStep() { return _diffStep; }
+function difficultyStep() {
+  if (level <= 10) return Math.floor((level - 1) / 2); // 0,0,1,1,2,2,3,3,4,4
+  return 5 + (level - 10);                              // continues from step 5
+}
 
 function enemySpeed()         { return (2 + difficultyStep() * 0.4) * (isDebuff() ? 0.4 : 1); }
 function enemySpawnInterval() { return Math.max(200, 1000 - difficultyStep() * 80); }
 let lastEnemySpawn = 0;
 
-function spawnEnemy(now) {
+function spawnEnemy() {
+  const now = Date.now();
   if (now - lastEnemySpawn < enemySpawnInterval()) return;
   lastEnemySpawn = now;
   const x = Math.random() * (canvas.width - ENEMY_SIZE) + ENEMY_SIZE / 2;
@@ -437,9 +435,8 @@ function spawnEnemy(now) {
 }
 
 function drawEnemies() {
-  const useImg = enemyImg.complete && enemyImg.naturalWidth > 0;
   for (const enemy of enemies) {
-    if (useImg) {
+    if (enemyImg.complete && enemyImg.naturalWidth > 0) {
       ctx.save();
       ctx.translate(enemy.x, enemy.y);
       ctx.rotate(Math.PI / 2);   // +90° right so right-facing enemy faces downward
@@ -472,8 +469,8 @@ function bulletHitsEnemy(bullet, enemy) {
   );
 }
 
-function updateEnemies(now) {
-  spawnEnemy(now);
+function updateEnemies() {
+  spawnEnemy();
   const spd = enemySpeed();
   for (let i = enemies.length - 1; i >= 0; i--) {
     enemies[i].y += spd;
@@ -592,8 +589,6 @@ function updatePowerups(now) {
   }
 }
 
-const POWERUP_FALLBACK_COLORS = { health:'#ff4466', shield:'#00ddff', rapidfire:'#ffee00', tripleshot:'#ff8800', debuff:'#88ff44' };
-
 function drawPowerups() {
   for (const pu of fallingPowerups) {
     const img = powerupImgs[pu.type];
@@ -605,7 +600,8 @@ function drawPowerups() {
       ctx.drawImage(img, pu.x - s / 2, pu.y - s / 2, s, s);
     } else {
       // Fallback coloured circle
-      ctx.fillStyle = POWERUP_FALLBACK_COLORS[pu.type] || '#ffffff';
+      const colors = { health:'#ff4466', shield:'#00ddff', rapidfire:'#ffee00', tripleshot:'#ff8800', debuff:'#88ff44' };
+      ctx.fillStyle = colors[pu.type] || '#ffffff';
       ctx.beginPath(); ctx.arc(pu.x, pu.y, s / 2, 0, Math.PI * 2); ctx.fill();
     }
     ctx.shadowBlur = 0;
@@ -620,10 +616,7 @@ function isPowerShield(){ return activePowerups.shield.active;     }
 
 function updateLevel() {
   const newLevel = Math.floor(score / POINTS_PER_LEVEL) + 1;
-  if (newLevel > level) {
-    level = newLevel;
-    _diffStep = level <= 10 ? Math.floor((level - 1) / 2) : 5 + (level - 10);
-  }
+  if (newLevel > level) level = newLevel;
 }
 
 // --- Shield timer handled by updatePowerups ---
@@ -631,7 +624,6 @@ function updateShield() {} // no-op; shield is now a power-up
 
 // --- Update ---
 function update() {
-  const now = Date.now();
   // Active target X: touch on mobile, mouse on desktop
   const targetX = (deviceMode === 'mobile' && touchX !== null) ? touchX :
                   (inputMode.move === 'mouse' && mouseX !== null) ? mouseX : null;
@@ -651,41 +643,39 @@ function update() {
   if (player.x + halfW > canvas.width) player.x = canvas.width - halfW;
 
   // Auto-shoot on mobile; manual otherwise
-  if (deviceMode === 'mobile' || keys.attack) shoot(now);
+  if (deviceMode === 'mobile' || keys.attack) shoot();
 
-  const bspd = bulletSpeed();
   for (let i = bullets.length - 1; i >= 0; i--) {
-    bullets[i].y -= bspd;
+    bullets[i].y -= bulletSpeed();
     if (bullets[i].y + BULLET_HEIGHT / 2 < 0) bullets.splice(i, 1);
   }
 
+  const now = Date.now();
   updateLevel();
   updateShield();
   updatePowerups(now);
-  updateEnemies(now);
+  updateEnemies();
   updateBoss(now);
   checkBulletEnemyCollisions();
-  checkBulletBossCollisions(now);
+  checkBulletBossCollisions();
   updateParticles();
 }
 
 // --- HUD helpers ---
-let _hudScale = 1; // set once per draw() call
-function hudScale() { return _hudScale; }
-
-let _bgSrc = { img: null, cw: 0, ch: 0, x: 0, y: 0, w: 0, h: 0 };
+function hudScale() {
+  // On mobile the canvas is stretched via CSS; scale text/badges to match
+  return deviceMode === 'mobile' ? Math.min(canvas.width / 800, canvas.height / 600) * 1.4 : 1;
+}
 
 function drawBackground() {
   const bg = activeBg();
   if (bg && bg.complete && bg.naturalWidth > 0) {
-    if (bg !== _bgSrc.img || canvas.width !== _bgSrc.cw || canvas.height !== _bgSrc.ch) {
-      const imgW = bg.naturalWidth, imgH = bg.naturalHeight;
-      const cR = canvas.width / canvas.height, iR = imgW / imgH;
-      if (iR > cR) { _bgSrc.h = imgH; _bgSrc.w = imgH * cR; _bgSrc.x = (imgW - _bgSrc.w) / 2; _bgSrc.y = 0; }
-      else         { _bgSrc.w = imgW; _bgSrc.h = imgW / cR;  _bgSrc.x = 0; _bgSrc.y = (imgH - _bgSrc.h) / 2; }
-      _bgSrc.img = bg; _bgSrc.cw = canvas.width; _bgSrc.ch = canvas.height;
-    }
-    ctx.drawImage(bg, _bgSrc.x, _bgSrc.y, _bgSrc.w, _bgSrc.h, 0, 0, canvas.width, canvas.height);
+    const imgW = bg.naturalWidth, imgH = bg.naturalHeight;
+    const cR = canvas.width / canvas.height, iR = imgW / imgH;
+    let srcX, srcY, srcW, srcH;
+    if (iR > cR) { srcH = imgH; srcW = imgH * cR; srcX = (imgW - srcW) / 2; srcY = 0; }
+    else         { srcW = imgW; srcH = imgW / cR;  srcX = 0; srcY = (imgH - srcH) / 2; }
+    ctx.drawImage(bg, srcX, srcY, srcW, srcH, 0, 0, canvas.width, canvas.height);
   } else {
     ctx.fillStyle = '#000010'; ctx.fillRect(0, 0, canvas.width, canvas.height);
   }
@@ -740,8 +730,8 @@ function drawLives() {
 
   if (!shieldOn) {
     const iconsX = boxX + padX + labelW + 10 * sc;
-    ctx.font = `${heartSize}px Arial`;
     for (let i = 0; i < MAX_LIVES; i++) {
+      ctx.font = `${heartSize}px Arial`;
       ctx.fillStyle = i < lives ? '#ff4466' : 'rgba(255,255,255,0.15)';
       ctx.fillText('♥', iconsX + i * (heartSize + 6 * sc), boxY + boxH / 2);
     }
@@ -777,7 +767,8 @@ function drawActivePowerupHUD() {
     if (img && img.complete && img.naturalWidth > 0) {
       ctx.drawImage(img, curX, baseY, iconSize, iconSize);
     } else {
-      ctx.fillStyle = POWERUP_FALLBACK_COLORS[type] || '#fff';
+      const colors = { shield:'#00ddff', rapidfire:'#ffee00', tripleshot:'#ff8800', debuff:'#88ff44' };
+      ctx.fillStyle = colors[type] || '#fff';
       ctx.beginPath(); ctx.arc(curX + iconSize/2, baseY + iconSize/2, iconSize/2 - 2, 0, Math.PI*2); ctx.fill();
     }
     ctx.shadowBlur = 0;
@@ -794,7 +785,6 @@ function drawActivePowerupHUD() {
 }
 
 function draw() {
-  _hudScale = deviceMode === 'mobile' ? Math.min(canvas.width / 800, canvas.height / 600) * 1.4 : 1;
   drawBackground();
   drawParticles();
   drawPowerups();
@@ -844,7 +834,7 @@ function triggerGameOver() {
 
 // --- Reset ---
 function resetGame() {
-  score = 0; lives = MAX_LIVES; level = 1; _diffStep = 0;
+  score = 0; lives = MAX_LIVES; level = 1;
   gameOver = false; gamePaused = false;
   shieldActive = false; shieldEndTime = 0;
   enemies.length = 0; bullets.length = 0; particles.length = 0;
@@ -1027,7 +1017,6 @@ function rebind(action, newKey) {
     if (idx !== -1 && a !== action) keyList.splice(idx, 1);
   }
   bindings[action] = [newKey];
-  buildKeyMap();
   stopListening();
   bindNote.textContent = `✓ Bound to "${displayKey(newKey)}"`;
   setTimeout(() => { bindNote.textContent = ''; }, 2000);
