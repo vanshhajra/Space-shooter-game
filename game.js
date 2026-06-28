@@ -54,28 +54,13 @@ let level = 1;
 const MAX_LIVES        = 3;
 const POINTS_PER_LEVEL = 100;
 
-// --- High score — always loaded from the logged-in user's account ---
-let highScore = 0;
-
-// Called by auth.js immediately after login/session restore
-function syncHighScoreFromUser() {
-  if (typeof currentUser === 'undefined' || !currentUser) {
-    highScore = 0;
-  } else {
-    const data = getUserData(currentUser);
-    highScore = (data && data.highScore) ? data.highScore : 0;
-  }
-  const lbl = document.getElementById('userLabel');
-  if (lbl && currentUser) lbl.textContent = `👤 ${currentUser}  |  Best: ${highScore}`;
-}
+// --- High score (persisted across sessions) ---
+let highScore = parseInt(localStorage.getItem('spaceShooterHighScore') || '0', 10);
 
 function updateHighScore() {
-  if (score <= highScore) return;
-  highScore = score;
-  if (typeof currentUser !== 'undefined' && currentUser) {
-    saveGameResult(currentUser, score);
-    const lbl = document.getElementById('userLabel');
-    if (lbl) lbl.textContent = `👤 ${currentUser}  |  Best: ${highScore}`;
+  if (score > highScore) {
+    highScore = score;
+    localStorage.setItem('spaceShooterHighScore', highScore);
   }
 }
 // Legacy variables kept only so resetGame/pauseToMenu don't error

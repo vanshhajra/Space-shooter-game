@@ -4,143 +4,102 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Space Shooter</title>
-  <link rel="icon" type="image/png" href="https://img.icons8.com/?size=100&id=eAodw0TpqLlC&format=png&color=000000">
   <link rel="stylesheet" href="style.css">
+  <link rel="icon" type="image/png" href="https://img.icons8.com/?size=100&id=DzVMBN9oL7WM&format=png&color=000000">
 </head>
 <body>
+  <h1 id="pageTitle">Space Shooter</h1>
+  <canvas id="gameCanvas" width="800" height="600"></canvas>
 
-  <!-- ── Auth Screen (shown first) ── -->
-  <div id="authScreen">
-    <h1 class="auth-title">Space Shooter</h1>
-
-    <div class="auth-tabs">
-      <button class="auth-tab active" id="tabLogin">Login</button>
-      <button class="auth-tab"        id="tabRegister">Register</button>
-    </div>
-
-    <!-- Login form -->
-    <form id="loginForm" class="auth-form" autocomplete="on">
-      <label for="loginUser">Username</label>
-      <input type="text"     id="loginUser" placeholder="Enter username" autocomplete="username" required>
-      <label for="loginPass">Password</label>
-      <input type="password" id="loginPass" placeholder="Enter password" autocomplete="current-password" required>
-      <p class="auth-error" id="loginError"></p>
-      <button type="submit" class="auth-btn">Login</button>
-      <p class="auth-guest">or <button type="button" id="guestBtn" class="auth-link">Continue as Guest</button></p>
-    </form>
-
-    <!-- Register form -->
-    <form id="registerForm" class="auth-form" style="display:none;" autocomplete="off">
-      <label for="regUser">Username</label>
-      <input type="text"     id="regUser"  placeholder="Choose a username"  autocomplete="username" required>
-      <label for="regPass">Password</label>
-      <input type="password" id="regPass"  placeholder="Choose a password"  autocomplete="new-password" required>
-      <label for="regPass2">Confirm Password</label>
-      <input type="password" id="regPass2" placeholder="Repeat password"    autocomplete="new-password" required>
-      <p class="auth-error" id="registerError"></p>
-      <button type="submit" class="auth-btn">Register</button>
-    </form>
+  <!-- Pause Menu Overlay -->
+  <div id="pauseMenu">
+    <h2>Paused</h2>
+    <button id="resumeBtn">▶ Resume</button>
+    <button id="pauseGoMenuBtn">⌂ Go to Menu</button>
   </div>
 
-  <!-- ── Game area (hidden until logged in) ── -->
-  <div id="gameArea" style="display:none;">
-    <div id="topBar">
-      <h1 id="pageTitle">Space Shooter</h1>
-      <div id="userInfo">
-        <span id="userLabel"></span>
-        <button id="logoutBtn">Logout</button>
+  <!-- Main Menu Overlay -->
+  <div id="menu">
+    <div id="gameOverInfo" style="display:none; text-align:center;">
+      <h2 id="gameOverTitle" style="color:#ff2222; text-shadow:0 0 16px #ff0000; font-size:2.4rem; letter-spacing:5px; text-transform:uppercase; margin-bottom:8px;">Game Over</h2>
+      <p id="gameOverScore" style="color:#ffee88; font-size:1.2rem; letter-spacing:2px; margin-bottom:4px;"></p>
+      <p id="gameOverHigh"  style="color:#ffd700; font-size:1rem; letter-spacing:2px;"></p>
+    </div>
+    <h2 id="menuTitle">Space Shooter</h2>
+    <p id="menuTagline">Survive the void. Destroy everything.</p>
+
+    <!-- Device toggle -->
+    <div class="mode-row" style="justify-content:center; gap:0;">
+      <div class="toggle-group" id="deviceToggle">
+        <button class="toggle-btn active" data-device="desktop">🖥 Desktop</button>
+        <button class="toggle-btn"        data-device="mobile">📱 Mobile</button>
       </div>
     </div>
 
-    <canvas id="gameCanvas" width="800" height="600"></canvas>
+    <!-- Background upload -->
+    <div class="bg-upload-row">
+      <label class="bg-upload-label" for="bgUpload">🖼 Background</label>
+      <label class="bg-upload-btn" for="bgUpload">Choose Image</label>
+      <input type="file" id="bgUpload" accept="image/*" style="display:none;">
+      <button id="bgResetBtn" title="Reset to default">↺</button>
+    </div>
+    <p id="bgUploadName" style="color:#aac8ff;font-size:0.8rem;letter-spacing:1px;"></p>
 
-    <!-- Pause Menu Overlay -->
-    <div id="pauseMenu">
-      <h2>Paused</h2>
-      <button id="resumeBtn">▶ Resume</button>
-      <button id="pauseGoMenuBtn">⌂ Go to Menu</button>
+    <button id="playBtn">▶ Play</button>
+    <button id="restartBtn" style="display:none;">↺ Restart</button>
+    <button id="goMenuBtn"  style="display:none;">⌂ Go to Menu</button>
+    <button id="controlsBtn">⚙ Controls</button>
+  </div>
+
+  <!-- Controls Panel Overlay -->
+  <div id="controlsPanel">
+    <h3>Controls</h3>
+
+    <!-- Movement mode toggle -->
+    <div class="mode-row">
+      <span class="mode-label">Movement</span>
+      <div class="toggle-group" id="moveToggle">
+        <button class="toggle-btn active" data-mode="mouse">🖱 Mouse</button>
+        <button class="toggle-btn"        data-mode="keyboard">⌨ Keyboard</button>
+      </div>
     </div>
 
-    <!-- Main Menu Overlay -->
-    <div id="menu">
-      <div id="gameOverInfo" style="display:none; text-align:center;">
-        <h2 id="gameOverTitle" style="color:#ff2222; text-shadow:0 0 16px #ff0000; font-size:2.4rem; letter-spacing:5px; text-transform:uppercase; margin-bottom:8px;">Game Over</h2>
-        <p id="gameOverScore" style="color:#ffee88; font-size:1.2rem; letter-spacing:2px; margin-bottom:4px;"></p>
-        <p id="gameOverHigh"  style="color:#ffd700; font-size:1rem; letter-spacing:2px;"></p>
-      </div>
-      <h2 id="menuTitle">Space Shooter</h2>
-      <p id="menuTagline">Survive the void. Destroy everything.</p>
-
-      <!-- Device toggle -->
-      <div class="mode-row" style="justify-content:center; gap:0;">
-        <div class="toggle-group" id="deviceToggle">
-          <button class="toggle-btn active" data-device="desktop">🖥 Desktop</button>
-          <button class="toggle-btn"        data-device="mobile">📱 Mobile</button>
-        </div>
-      </div>
-
-      <!-- Background upload -->
-      <div class="bg-upload-row">
-        <label class="bg-upload-label" for="bgUpload">🖼 Background</label>
-        <label class="bg-upload-btn"   for="bgUpload">Choose Image</label>
-        <input type="file" id="bgUpload" accept="image/*" style="display:none;">
-        <button id="bgResetBtn" title="Reset to default">↺</button>
-      </div>
-      <p id="bgUploadName" style="color:#aac8ff;font-size:0.8rem;letter-spacing:1px;"></p>
-
-      <button id="playBtn">▶ Play</button>
-      <button id="restartBtn" style="display:none;">↺ Restart</button>
-      <button id="goMenuBtn"  style="display:none;">⌂ Go to Menu</button>
-      <button id="controlsBtn">⚙ Controls</button>
+    <!-- Keyboard rebind rows — shown only in keyboard mode -->
+    <div class="bind-grid" id="moveBinds">
+      <label>Move Left</label>
+      <button class="bind-btn" data-action="left">
+        <span class="current-key" id="key-left"></span>
+        <span class="hint">click to rebind</span>
+      </button>
+      <label>Move Right</label>
+      <button class="bind-btn" data-action="right">
+        <span class="current-key" id="key-right"></span>
+        <span class="hint">click to rebind</span>
+      </button>
     </div>
 
-    <!-- Controls Panel Overlay -->
-    <div id="controlsPanel">
-      <h3>Controls</h3>
-
-      <div class="mode-row">
-        <span class="mode-label">Movement</span>
-        <div class="toggle-group" id="moveToggle">
-          <button class="toggle-btn active" data-mode="mouse">🖱 Mouse</button>
-          <button class="toggle-btn"        data-mode="keyboard">⌨ Keyboard</button>
-        </div>
+    <!-- Attack mode toggle -->
+    <div class="mode-row">
+      <span class="mode-label">Attack</span>
+      <div class="toggle-group" id="attackToggle">
+        <button class="toggle-btn active" data-mode="mouse">🖱 Mouse Click</button>
+        <button class="toggle-btn"        data-mode="keyboard">⌨ Keyboard</button>
       </div>
-
-      <div class="bind-grid" id="moveBinds">
-        <label>Move Left</label>
-        <button class="bind-btn" data-action="left">
-          <span class="current-key" id="key-left"></span>
-          <span class="hint">click to rebind</span>
-        </button>
-        <label>Move Right</label>
-        <button class="bind-btn" data-action="right">
-          <span class="current-key" id="key-right"></span>
-          <span class="hint">click to rebind</span>
-        </button>
-      </div>
-
-      <div class="mode-row">
-        <span class="mode-label">Attack</span>
-        <div class="toggle-group" id="attackToggle">
-          <button class="toggle-btn active" data-mode="mouse">🖱 Mouse Click</button>
-          <button class="toggle-btn"        data-mode="keyboard">⌨ Keyboard</button>
-        </div>
-      </div>
-
-      <div class="bind-grid" id="attackBinds">
-        <label>Attack</label>
-        <button class="bind-btn" data-action="attack">
-          <span class="current-key" id="key-attack"></span>
-          <span class="hint">click to rebind</span>
-        </button>
-      </div>
-
-      <p class="bind-note" id="bindNote"></p>
-      <button id="backBtn">← Back</button>
     </div>
-  </div><!-- end #gameArea -->
 
-  <script src="auth.js"></script>
+    <!-- Keyboard rebind row — shown only in keyboard attack mode -->
+    <div class="bind-grid" id="attackBinds">
+      <label>Attack</label>
+      <button class="bind-btn" data-action="attack">
+        <span class="current-key" id="key-attack"></span>
+        <span class="hint">click to rebind</span>
+      </button>
+    </div>
+
+    <p class="bind-note" id="bindNote"></p>
+    <button id="backBtn">← Back</button>
+  </div>
+
   <script src="game.js"></script>
 </body>
 </html>
