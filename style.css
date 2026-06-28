@@ -2,6 +2,7 @@
   margin: 0;
   padding: 0;
   box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
 }
 
 body {
@@ -12,9 +13,11 @@ body {
   justify-content: center;
   min-height: 100vh;
   font-family: Arial, sans-serif;
+  overflow: hidden;
+  touch-action: none;
 }
 
-h1 {
+#pageTitle {
   color: #ffffff;
   font-size: 2.5rem;
   letter-spacing: 4px;
@@ -28,10 +31,25 @@ canvas {
   margin: 0 auto;
 }
 
+/* ── Mobile fullscreen ── */
+body.mobile-mode {
+  justify-content: flex-start;
+}
+
+body.mobile-mode #pageTitle {
+  display: none;
+}
+
+body.mobile-mode canvas {
+  width: 100vw !important;
+  height: 100vh !important;
+  display: block;
+}
+
 /* ── Pause menu overlay ── */
 #pauseMenu {
   display: none;
-  position: absolute;
+  position: fixed;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
@@ -43,6 +61,7 @@ canvas {
   border-radius: 12px;
   padding: 44px 64px;
   min-width: 280px;
+  z-index: 100;
 }
 
 #pauseMenu h2 {
@@ -69,11 +88,7 @@ canvas {
   transition: transform 0.1s, box-shadow 0.1s;
 }
 
-#resumeBtn:hover {
-  transform: scale(1.06);
-  box-shadow: 0 0 18px #ffdd00cc, 0 0 36px #ffaa0099;
-}
-
+#resumeBtn:hover  { transform: scale(1.06); box-shadow: 0 0 18px #ffdd00cc, 0 0 36px #ffaa0099; }
 #resumeBtn:active { transform: scale(0.97); }
 
 #pauseGoMenuBtn {
@@ -90,14 +105,11 @@ canvas {
   transition: background 0.15s, border-color 0.15s;
 }
 
-#pauseGoMenuBtn:hover {
-  background: rgba(255, 220, 0, 0.1);
-  border-color: #ffe600;
-}
+#pauseGoMenuBtn:hover { background: rgba(255, 220, 0, 0.1); border-color: #ffe600; }
 
 /* ── Menu overlay ── */
 #menu {
-  position: absolute;
+  position: fixed;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
@@ -109,6 +121,9 @@ canvas {
   border: 1px solid rgba(255, 220, 0, 0.25);
   border-radius: 12px;
   padding: 48px 64px;
+  z-index: 100;
+  max-height: 95vh;
+  overflow-y: auto;
 }
 
 #menu h2 {
@@ -125,32 +140,8 @@ canvas {
   letter-spacing: 1px;
 }
 
-#playBtn {
-  padding: 14px 36px;       /* 10–20px vertical, generous horizontal */
-  font-size: 1.1rem;
-  font-weight: bold;
-  letter-spacing: 2px;
-  text-transform: uppercase;
-  color: #1a1000;
-  background: linear-gradient(135deg, #ffe600, #ffaa00);
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  box-shadow: 0 0 12px #ffcc00aa, 0 0 24px #ffaa0066;
-  transition: transform 0.1s, box-shadow 0.1s;
-}
-
-#playBtn:hover {
-  transform: scale(1.06);
-  box-shadow: 0 0 18px #ffdd00cc, 0 0 36px #ffaa0099;
-}
-
-#playBtn:active {
-  transform: scale(0.97);
-}
-
-/* ── Restart button (same yellow style as Play) ── */
-#restartBtn {
+/* ── Yellow primary button shared style ── */
+#playBtn, #restartBtn {
   padding: 14px 36px;
   font-size: 1.1rem;
   font-weight: bold;
@@ -165,15 +156,15 @@ canvas {
   transition: transform 0.1s, box-shadow 0.1s;
 }
 
-#restartBtn:hover {
+#playBtn:hover, #restartBtn:hover {
   transform: scale(1.06);
   box-shadow: 0 0 18px #ffdd00cc, 0 0 36px #ffaa0099;
 }
 
-#restartBtn:active { transform: scale(0.97); }
+#playBtn:active, #restartBtn:active { transform: scale(0.97); }
 
-/* ── Go to Menu button (secondary outline style) ── */
-#goMenuBtn {
+/* ── Secondary outline buttons ── */
+#goMenuBtn, #controlsBtn, #pauseGoMenuBtn {
   padding: 10px 28px;
   font-size: 0.95rem;
   font-weight: bold;
@@ -187,34 +178,12 @@ canvas {
   transition: background 0.15s, border-color 0.15s;
 }
 
-#goMenuBtn:hover {
-  background: rgba(255, 220, 0, 0.1);
-  border-color: #ffe600;
-}
-
-#controlsBtn {
-  padding: 10px 28px;
-  font-size: 0.95rem;
-  font-weight: bold;
-  letter-spacing: 2px;
-  text-transform: uppercase;
-  color: #ffe600;
-  background: transparent;
-  border: 1px solid #ffe60066;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: background 0.15s, border-color 0.15s;
-}
-
-#controlsBtn:hover {
-  background: rgba(255, 220, 0, 0.1);
-  border-color: #ffe600;
-}
+#goMenuBtn:hover, #controlsBtn:hover { background: rgba(255, 220, 0, 0.1); border-color: #ffe600; }
 
 /* ── Controls panel ── */
 #controlsPanel {
   display: none;
-  position: absolute;
+  position: fixed;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
@@ -226,6 +195,9 @@ canvas {
   border-radius: 12px;
   padding: 40px 56px;
   min-width: 380px;
+  z-index: 100;
+  max-height: 95vh;
+  overflow-y: auto;
 }
 
 #controlsPanel h3 {
@@ -236,7 +208,7 @@ canvas {
   text-shadow: 0 0 10px #4af;
 }
 
-/* ── Mode row (label + toggle group) ── */
+/* ── Mode row ── */
 .mode-row {
   display: flex;
   align-items: center;
@@ -273,23 +245,18 @@ canvas {
   transition: background 0.15s, color 0.15s;
 }
 
-.toggle-btn + .toggle-btn {
-  border-left: 1px solid #ffe60033;
-}
+.toggle-btn + .toggle-btn { border-left: 1px solid #ffe60033; }
 
 .toggle-btn.active {
   background: linear-gradient(135deg, #ffe600, #ffaa00);
   color: #1a1000;
 }
 
-.toggle-btn:not(.active):hover {
-  background: rgba(255, 220, 0, 0.1);
-  color: #ffe600;
-}
+.toggle-btn:not(.active):hover { background: rgba(255, 220, 0, 0.1); color: #ffe600; }
 
-/* ── Bind grid (keyboard rebind rows) ── */
+/* ── Bind grid ── */
 .bind-grid {
-  display: none;          /* hidden by default; shown via JS when keyboard mode active */
+  display: none;
   grid-template-columns: 1fr 1fr;
   gap: 12px 20px;
   align-items: center;
@@ -298,9 +265,7 @@ canvas {
   border-left: 2px solid #ffe60033;
 }
 
-.bind-grid.visible {
-  display: grid;
-}
+.bind-grid.visible { display: grid; }
 
 .bind-grid label {
   color: #aac8ff;
@@ -322,41 +287,17 @@ canvas {
   transition: background 0.15s, border-color 0.15s;
 }
 
-.bind-btn:hover {
-  background: rgba(255, 220, 0, 0.18);
-  border-color: #ffe600aa;
-}
-
-.bind-btn.listening {
-  background: rgba(255, 80, 80, 0.2);
-  border-color: #ff5555;
-  animation: pulse 0.6s infinite alternate;
-}
+.bind-btn:hover         { background: rgba(255, 220, 0, 0.18); border-color: #ffe600aa; }
+.bind-btn.listening     { background: rgba(255, 80, 80, 0.2); border-color: #ff5555; animation: pulse 0.6s infinite alternate; }
 
 @keyframes pulse {
   from { box-shadow: 0 0 4px #ff5555; }
   to   { box-shadow: 0 0 12px #ff5555; }
 }
 
-.current-key {
-  color: #ffe600;
-  font-size: 1rem;
-  font-weight: bold;
-  letter-spacing: 1px;
-}
-
-.hint {
-  color: #556688;
-  font-size: 0.7rem;
-  margin-top: 2px;
-}
-
-.bind-note {
-  color: #ff8888;
-  font-size: 0.82rem;
-  min-height: 1.1em;
-  letter-spacing: 1px;
-}
+.current-key { color: #ffe600; font-size: 1rem; font-weight: bold; letter-spacing: 1px; }
+.hint        { color: #556688; font-size: 0.7rem; margin-top: 2px; }
+.bind-note   { color: #ff8888; font-size: 0.82rem; min-height: 1.1em; letter-spacing: 1px; }
 
 #backBtn {
   padding: 10px 28px;
@@ -375,3 +316,60 @@ canvas {
 
 #backBtn:hover  { transform: scale(1.05); }
 #backBtn:active { transform: scale(0.97); }
+
+/* ── Background upload row ── */
+.bg-upload-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  justify-content: center;
+}
+
+.bg-upload-label {
+  color: #aac8ff;
+  font-size: 0.9rem;
+  letter-spacing: 1px;
+  white-space: nowrap;
+}
+
+.bg-upload-btn {
+  padding: 7px 16px;
+  font-size: 0.82rem;
+  font-weight: bold;
+  letter-spacing: 1px;
+  color: #ffe600;
+  background: transparent;
+  border: 1px solid #ffe60066;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.bg-upload-btn:hover { background: rgba(255,220,0,0.1); border-color: #ffe600; }
+
+#bgResetBtn {
+  padding: 6px 12px;
+  font-size: 1rem;
+  color: #aac8ff;
+  background: transparent;
+  border: 1px solid #aac8ff44;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: color 0.15s, border-color 0.15s;
+}
+
+#bgResetBtn:hover { color: #fff; border-color: #aac8ff; }
+
+/* ── Mobile responsive ── */
+@media (max-width: 500px) {
+  #menu, #controlsPanel, #pauseMenu {
+    padding: 28px 20px;
+    min-width: unset;
+    width: 90vw;
+  }
+
+  #menu h2, #pauseMenu h2 { font-size: 1.5rem; }
+  .toggle-btn { padding: 8px 10px; font-size: 0.75rem; }
+  #playBtn, #restartBtn { padding: 12px 24px; font-size: 1rem; }
+}
