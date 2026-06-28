@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Space Shooter</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <h1>Space Shooter</h1>
+  <canvas id="gameCanvas" width="800" height="600"></canvas>
+
+  <!-- Pause Menu Overlay -->
+  <div id="pauseMenu">
+    <h2>Paused</h2>
+    <button id="resumeBtn">▶ Resume</button>
+    <button id="pauseGoMenuBtn">⌂ Go to Menu</button>
+  </div>
+
+  <!-- Main Menu Overlay -->
+  <div id="menu">
+    <div id="gameOverInfo" style="display:none; text-align:center;">
+      <h2 id="gameOverTitle" style="color:#ff2222; text-shadow:0 0 16px #ff0000; font-size:2.4rem; letter-spacing:5px; text-transform:uppercase; margin-bottom:8px;">Game Over</h2>
+      <p id="gameOverScore" style="color:#ffee88; font-size:1.2rem; letter-spacing:2px; margin-bottom:4px;"></p>
+    </div>
+    <h2 id="menuTitle">Space Shooter</h2>
+    <p id="menuTagline">Survive the void. Destroy everything.</p>
+    <button id="playBtn">▶ Play</button>
+    <button id="restartBtn" style="display:none;">↺ Restart</button>
+    <button id="goMenuBtn"  style="display:none;">⌂ Go to Menu</button>
+    <button id="controlsBtn">⚙ Controls</button>
+  </div>
+
+  <!-- Controls Panel Overlay -->
+  <div id="controlsPanel">
+    <h3>Controls</h3>
+
+    <!-- Movement mode toggle -->
+    <div class="mode-row">
+      <span class="mode-label">Movement</span>
+      <div class="toggle-group" id="moveToggle">
+        <button class="toggle-btn active" data-mode="mouse">🖱 Mouse</button>
+        <button class="toggle-btn"        data-mode="keyboard">⌨ Keyboard</button>
+      </div>
+    </div>
+
+    <!-- Keyboard rebind rows — shown only in keyboard mode -->
+    <div class="bind-grid" id="moveBinds">
+      <label>Move Left</label>
+      <button class="bind-btn" data-action="left">
+        <span class="current-key" id="key-left"></span>
+        <span class="hint">click to rebind</span>
+      </button>
+
+      <label>Move Right</label>
+      <button class="bind-btn" data-action="right">
+        <span class="current-key" id="key-right"></span>
+        <span class="hint">click to rebind</span>
+      </button>
+    </div>
+
+    <!-- Attack mode toggle -->
+    <div class="mode-row">
+      <span class="mode-label">Attack</span>
+      <div class="toggle-group" id="attackToggle">
+        <button class="toggle-btn active" data-mode="mouse">🖱 Mouse Click</button>
+        <button class="toggle-btn"        data-mode="keyboard">⌨ Keyboard</button>
+      </div>
+    </div>
+
+    <!-- Keyboard rebind row — shown only in keyboard attack mode -->
+    <div class="bind-grid" id="attackBinds">
+      <label>Attack</label>
+      <button class="bind-btn" data-action="attack">
+        <span class="current-key" id="key-attack"></span>
+        <span class="hint">click to rebind</span>
+      </button>
+    </div>
+
+    <p class="bind-note" id="bindNote"></p>
+    <button id="backBtn">← Back</button>
+  </div>
+
+  <script src="game.js"></script>
+</body>
+</html>

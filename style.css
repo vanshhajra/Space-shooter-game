@@ -1,0 +1,377 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  background-color: #0a0a1a;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  font-family: Arial, sans-serif;
+}
+
+h1 {
+  color: #ffffff;
+  font-size: 2.5rem;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  margin-bottom: 20px;
+  text-shadow: 0 0 10px #4af, 0 0 20px #4af;
+}
+
+canvas {
+  display: block;
+  margin: 0 auto;
+}
+
+/* ── Pause menu overlay ── */
+#pauseMenu {
+  display: none;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  flex-direction: column;
+  align-items: center;
+  gap: 18px;
+  background: rgba(0, 0, 10, 0.88);
+  border: 1px solid rgba(255, 220, 0, 0.3);
+  border-radius: 12px;
+  padding: 44px 64px;
+  min-width: 280px;
+}
+
+#pauseMenu h2 {
+  color: #ffffff;
+  font-size: 2rem;
+  letter-spacing: 6px;
+  text-transform: uppercase;
+  text-shadow: 0 0 12px #4af, 0 0 24px #4af;
+  margin: 0;
+}
+
+#resumeBtn {
+  padding: 14px 36px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: #1a1000;
+  background: linear-gradient(135deg, #ffe600, #ffaa00);
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  box-shadow: 0 0 12px #ffcc00aa, 0 0 24px #ffaa0066;
+  transition: transform 0.1s, box-shadow 0.1s;
+}
+
+#resumeBtn:hover {
+  transform: scale(1.06);
+  box-shadow: 0 0 18px #ffdd00cc, 0 0 36px #ffaa0099;
+}
+
+#resumeBtn:active { transform: scale(0.97); }
+
+#pauseGoMenuBtn {
+  padding: 10px 28px;
+  font-size: 0.95rem;
+  font-weight: bold;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: #ffe600;
+  background: transparent;
+  border: 1px solid #ffe60066;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+#pauseGoMenuBtn:hover {
+  background: rgba(255, 220, 0, 0.1);
+  border-color: #ffe600;
+}
+
+/* ── Menu overlay ── */
+#menu {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 18px;
+  background: rgba(0, 0, 10, 0.82);
+  border: 1px solid rgba(255, 220, 0, 0.25);
+  border-radius: 12px;
+  padding: 48px 64px;
+}
+
+#menu h2 {
+  color: #ffffff;
+  font-size: 2.2rem;
+  letter-spacing: 5px;
+  text-transform: uppercase;
+  text-shadow: 0 0 12px #4af, 0 0 24px #4af;
+}
+
+#menu p {
+  color: #aac8ff;
+  font-size: 0.95rem;
+  letter-spacing: 1px;
+}
+
+#playBtn {
+  padding: 14px 36px;       /* 10–20px vertical, generous horizontal */
+  font-size: 1.1rem;
+  font-weight: bold;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: #1a1000;
+  background: linear-gradient(135deg, #ffe600, #ffaa00);
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  box-shadow: 0 0 12px #ffcc00aa, 0 0 24px #ffaa0066;
+  transition: transform 0.1s, box-shadow 0.1s;
+}
+
+#playBtn:hover {
+  transform: scale(1.06);
+  box-shadow: 0 0 18px #ffdd00cc, 0 0 36px #ffaa0099;
+}
+
+#playBtn:active {
+  transform: scale(0.97);
+}
+
+/* ── Restart button (same yellow style as Play) ── */
+#restartBtn {
+  padding: 14px 36px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: #1a1000;
+  background: linear-gradient(135deg, #ffe600, #ffaa00);
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  box-shadow: 0 0 12px #ffcc00aa, 0 0 24px #ffaa0066;
+  transition: transform 0.1s, box-shadow 0.1s;
+}
+
+#restartBtn:hover {
+  transform: scale(1.06);
+  box-shadow: 0 0 18px #ffdd00cc, 0 0 36px #ffaa0099;
+}
+
+#restartBtn:active { transform: scale(0.97); }
+
+/* ── Go to Menu button (secondary outline style) ── */
+#goMenuBtn {
+  padding: 10px 28px;
+  font-size: 0.95rem;
+  font-weight: bold;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: #ffe600;
+  background: transparent;
+  border: 1px solid #ffe60066;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+#goMenuBtn:hover {
+  background: rgba(255, 220, 0, 0.1);
+  border-color: #ffe600;
+}
+
+#controlsBtn {
+  padding: 10px 28px;
+  font-size: 0.95rem;
+  font-weight: bold;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: #ffe600;
+  background: transparent;
+  border: 1px solid #ffe60066;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+#controlsBtn:hover {
+  background: rgba(255, 220, 0, 0.1);
+  border-color: #ffe600;
+}
+
+/* ── Controls panel ── */
+#controlsPanel {
+  display: none;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  background: rgba(0, 0, 10, 0.92);
+  border: 1px solid rgba(255, 220, 0, 0.25);
+  border-radius: 12px;
+  padding: 40px 56px;
+  min-width: 380px;
+}
+
+#controlsPanel h3 {
+  color: #ffffff;
+  font-size: 1.4rem;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  text-shadow: 0 0 10px #4af;
+}
+
+/* ── Mode row (label + toggle group) ── */
+.mode-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  gap: 16px;
+}
+
+.mode-label {
+  color: #aac8ff;
+  font-size: 0.9rem;
+  letter-spacing: 1px;
+  white-space: nowrap;
+  min-width: 70px;
+}
+
+/* ── Toggle group ── */
+.toggle-group {
+  display: flex;
+  border: 1px solid #ffe60055;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.toggle-btn {
+  padding: 8px 18px;
+  font-size: 0.85rem;
+  font-weight: bold;
+  letter-spacing: 1px;
+  color: #aac8ff;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+
+.toggle-btn + .toggle-btn {
+  border-left: 1px solid #ffe60033;
+}
+
+.toggle-btn.active {
+  background: linear-gradient(135deg, #ffe600, #ffaa00);
+  color: #1a1000;
+}
+
+.toggle-btn:not(.active):hover {
+  background: rgba(255, 220, 0, 0.1);
+  color: #ffe600;
+}
+
+/* ── Bind grid (keyboard rebind rows) ── */
+.bind-grid {
+  display: none;          /* hidden by default; shown via JS when keyboard mode active */
+  grid-template-columns: 1fr 1fr;
+  gap: 12px 20px;
+  align-items: center;
+  width: 100%;
+  padding-left: 12px;
+  border-left: 2px solid #ffe60033;
+}
+
+.bind-grid.visible {
+  display: grid;
+}
+
+.bind-grid label {
+  color: #aac8ff;
+  font-size: 0.9rem;
+  letter-spacing: 1px;
+  text-align: right;
+}
+
+.bind-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 8px 16px;
+  min-width: 120px;
+  background: rgba(255, 220, 0, 0.08);
+  border: 1px solid #ffe60055;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.bind-btn:hover {
+  background: rgba(255, 220, 0, 0.18);
+  border-color: #ffe600aa;
+}
+
+.bind-btn.listening {
+  background: rgba(255, 80, 80, 0.2);
+  border-color: #ff5555;
+  animation: pulse 0.6s infinite alternate;
+}
+
+@keyframes pulse {
+  from { box-shadow: 0 0 4px #ff5555; }
+  to   { box-shadow: 0 0 12px #ff5555; }
+}
+
+.current-key {
+  color: #ffe600;
+  font-size: 1rem;
+  font-weight: bold;
+  letter-spacing: 1px;
+}
+
+.hint {
+  color: #556688;
+  font-size: 0.7rem;
+  margin-top: 2px;
+}
+
+.bind-note {
+  color: #ff8888;
+  font-size: 0.82rem;
+  min-height: 1.1em;
+  letter-spacing: 1px;
+}
+
+#backBtn {
+  padding: 10px 28px;
+  font-size: 0.95rem;
+  font-weight: bold;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: #1a1000;
+  background: linear-gradient(135deg, #ffe600, #ffaa00);
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  box-shadow: 0 0 10px #ffcc00aa;
+  transition: transform 0.1s;
+}
+
+#backBtn:hover  { transform: scale(1.05); }
+#backBtn:active { transform: scale(0.97); }
